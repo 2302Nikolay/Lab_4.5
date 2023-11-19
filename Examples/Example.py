@@ -48,31 +48,17 @@ class Staff:
         if year < 0 or year > today.year:
             raise IllegalYearError(year)
 
-        self.workers.append(
-            Worker(
-                name=name,
-                post=post,
-                year=year
-            )
-        )
+        self.workers.append(Worker(name=name, post=post, year=year))
         self.workers.sort(key=lambda worker: worker.name)
 
     def __str__(self) -> str:
         # Заголовок таблицы.
         table = []
-        line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-            '-' * 4,
-            '-' * 30,
-            '-' * 20,
-            '-' * 8
-        )
+        line = "+-{}-+-{}-+-{}-+-{}-+".format("-" * 4, "-" * 30, "-" * 20, "-" * 8)
         table.append(line)
         table.append(
-            '| {:^4} | {:^30} | {:^20} | {:^8} |'.format(
-                "№",
-                "Ф.И.О.",
-                "Должность",
-                "Год"
+            "| {:^4} | {:^30} | {:^20} | {:^8} |".format(
+                "№", "Ф.И.О.", "Должность", "Год"
             )
         )
         table.append(line)
@@ -80,16 +66,13 @@ class Staff:
         # Вывести данные о всех сотрудниках.
         for idx, worker in enumerate(self.workers, 1):
             table.append(
-                '| {:>4} | {:<30} | {:<20} | {:>8} |'.format(
-                    idx,
-                    worker.name,
-                    worker.post,
-                    worker.year
+                "| {:>4} | {:<30} | {:<20} | {:>8} |".format(
+                    idx, worker.name, worker.post, worker.year
                 )
             )
         table.append(line)
 
-        return '\n'.join(table)
+        return "\n".join(table)
 
     def select(self, period: int) -> List[Worker]:
         # Получить текущую дату.
@@ -102,7 +85,7 @@ class Staff:
         return result
 
     def load(self, filename: str) -> None:
-        with open(filename, 'r', encoding='utf8') as fin:
+        with open(filename, "r", encoding="utf8") as fin:
             xml = fin.read()
 
         parser = ET.XMLParser(encoding="utf8")
@@ -113,49 +96,40 @@ class Staff:
             name, post, year = None, None, None
 
             for element in worker_element:
-                if element.tag == 'name':
+                if element.tag == "name":
                     name = element.text
-                elif element.tag == 'post':
+                elif element.tag == "post":
                     post = element.text
-                elif element.tag == 'year':
+                elif element.tag == "year":
                     year = int(element.text)
 
                 if name is not None and post is not None and year is not None:
-                    self.workers.append(
-                        Worker(
-                            name=name,
-                            post=post,
-                            year=year
-                        )
-                    )
+                    self.workers.append(Worker(name=name, post=post, year=year))
 
     def save(self, filename: str) -> None:
-        root = ET.Element('workers')
+        root = ET.Element("workers")
         for worker in self.workers:
-            worker_element = ET.Element('worker')
+            worker_element = ET.Element("worker")
 
-            name_element = ET.SubElement(worker_element, 'name')
+            name_element = ET.SubElement(worker_element, "name")
             name_element.text = worker.name
 
-            post_element = ET.SubElement(worker_element, 'post')
+            post_element = ET.SubElement(worker_element, "post")
             post_element.text = worker.post
 
-            year_element = ET.SubElement(worker_element, 'year')
+            year_element = ET.SubElement(worker_element, "year")
             year_element.text = str(worker.year)
 
             root.append(worker_element)
 
             tree = ET.ElementTree(root)
-            with open(filename, 'wb') as fout:
-                tree.write(fout, encoding='utf8', xml_declaration=True)
+            with open(filename, "wb") as fout:
+                tree.write(fout, encoding="utf8", xml_declaration=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Выполнить настройку логгера.
-    logging.basicConfig(
-        filename='workers4.log',
-        level=logging.INFO
-    )
+    logging.basicConfig(filename="workers4.log", level=logging.INFO)
     # Список работников.
     staff = Staff()
 
@@ -166,9 +140,9 @@ if __name__ == '__main__':
             command = input(">>> ").lower()
 
             # Выполнить действие в соответствие с командой.
-            if command == 'exit':
+            if command == "exit":
                 break
-            elif command == 'add':
+            elif command == "add":
                 # Запросить данные о работнике.
                 name = input("Фамилия и инициалы? ")
                 post = input("Должность? ")
@@ -180,11 +154,11 @@ if __name__ == '__main__':
                     f"Добавлен сотрудник: {name}, {post}, "
                     f"поступивший в {year} году."
                 )
-            elif command == 'list':
+            elif command == "list":
                 # Вывести список.
                 print(staff)
                 logging.info("Отображен список сотрудников.")
-            elif command.startswith('select '):
+            elif command.startswith("select "):
                 # Разбить команду на части для выделения номера года.
                 parts = command.split(maxsplit=1)
                 # Запросить работников.
@@ -193,9 +167,7 @@ if __name__ == '__main__':
                 # Вывести результаты запроса.
                 if selected:
                     for idx, worker in enumerate(selected, 1):
-                        print(
-                            '{:>4}: {}'.format(idx, worker.name)
-                        )
+                        print("{:>4}: {}".format(idx, worker.name))
                     logging.info(
                         f"Найдено {len(selected)} работников со "
                         f"стажем более {parts[1]} лет."
@@ -206,20 +178,20 @@ if __name__ == '__main__':
                         f"Работники со стажем более {parts[1]} лет не найдены."
                     )
 
-            elif command.startswith('load '):
+            elif command.startswith("load "):
                 # Разбить команду на части для имени файла.
                 parts = command.split(maxsplit=1)
                 # Загрузить данные из файла.
                 staff.load(parts[1])
                 logging.info(f"Загружены данные из файла {parts[1]}.")
 
-            elif command.startswith('save '):
+            elif command.startswith("save "):
                 # Разбить команду на части для имени файла.
                 parts = command.split(maxsplit=1)
                 # Сохранить данные в файл.
                 staff.save(parts[1])
                 logging.info(f"Сохранены данные в файл {parts[1]}.")
-            elif command == 'help':
+            elif command == "help":
                 # Вывести справку о работе с программой.
                 print("Список команд:\n")
                 print("add - добавить работника;")
